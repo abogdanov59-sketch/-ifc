@@ -51,7 +51,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
-RUN git clone --depth 1 --branch v${IFCOPENSHELL_VERSION} https://github.com/IfcOpenShell/IfcOpenShell.git ifcopenshell
+RUN git clone --branch v${IFCOPENSHELL_VERSION} --recurse-submodules --depth 1 --shallow-submodules \
+    https://github.com/IfcOpenShell/IfcOpenShell.git ifcopenshell
 
 WORKDIR /tmp/ifcopenshell/cmake
 RUN cmake -S . -B build \
