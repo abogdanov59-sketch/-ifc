@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  ifc-glb-service:
+    build: .
+    image: ifc-glb-service:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - MAX_UPLOAD_MB=1024
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
