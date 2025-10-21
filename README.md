@@ -1,13 +1,13 @@
 # IFC to GLB Conversion Service
 
-This project provides a Kotlin (Ktor) web service that accepts IFC uploads and converts them to GLB using an in-process JNI bridge. The native layer is intentionally lightweight in this repository and produces a placeholder GLB artefact. Integrating the full IfcOpenShell toolchain requires updating the native build to link against the IfcOpenShell and OCCT libraries inside the Docker image.
+This project provides a Kotlin (Ktor) web service that accepts IFC uploads and converts them to GLB using an in-process JNI bridge. The service bundles a native integration of the IfcOpenShell geometry toolkit and performs the conversion without spawning external command line tools.
 
 ## Features
 
 - **Single REST endpoint** `POST /convert` for uploading IFC files using `multipart/form-data`.
-- Conversion is delegated to a JNI bridge (`libifcglb_jni.so`).
-- Native converter writes a minimal GLB file to the configured `/data/out` directory.
-- Dockerfile and docker-compose configuration for containerised builds.
+- Conversion is delegated to a JNI bridge (`libifcglb_jni.so`) that uses the IfcOpenShell C++ API and its built-in glTF serializer.
+- Geometry options (units, tolerance, vertex welding, inclusion of properties, and level of detail) are configurable per request.
+- Dockerfile and docker-compose configuration for containerised builds that compile IfcOpenShell and its dependencies from source.
 - Optional `GET /health` endpoint for service health checks.
 
 ## Project structure
@@ -56,6 +56,8 @@ Alternatively, install Gradle locally and run `gradle wrapper` inside the reposi
 docker-compose build
 ```
 
+The Docker build compiles OpenCascade, IfcOpenShell (with glTF support), the JNI library, and the Ktor service inside the builder stage image.
+
 ### 3. Start the service
 
 ```bash
@@ -85,9 +87,9 @@ The converted GLB artefact is written to `./data/out/<uuid>.glb` on the host.
 
 ## Development notes
 
-- The native converter currently writes a placeholder GLB structure. Replace the implementation in `native/src/IfcToGltfConverter.cpp` with logic that leverages IfcOpenShell's geometry API and tinygltf for production use.
-- Update `native/CMakeLists.txt` to locate and link against IfcOpenShell and OCCT libraries when integrating the full toolchain.
-- The Dockerfile contains the high-level steps required for compiling IfcOpenShell from source; additional dependencies may be necessary.
+- The native converter now uses IfcOpenShell's glTF serializer to emit binary glTF (GLB) assets. The implementation is designed to work across multiple IfcOpenShell versions by probing available APIs at compile time.
+- `native/CMakeLists.txt` resolves IfcOpenShell and OpenCascade libraries automatically. Override `IFCOPENSHELL_ROOT` when building locally to point at a custom installation.
+- The Dockerfile demonstrates a complete toolchain build suitable for production containers. When iterating locally, ensure the same dependencies are available on the host before running `cmake`.
 
 ## Testing
 
