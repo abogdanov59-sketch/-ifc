@@ -7,7 +7,7 @@ This project provides a Kotlin (Ktor) web service that accepts IFC uploads and c
 - **Single REST endpoint** `POST /convert` for uploading IFC files using `multipart/form-data`.
 - Conversion is delegated to a JNI bridge (`libifcglb_jni.so`) that uses the IfcOpenShell C++ API and its built-in glTF serializer.
 - Geometry options (units, tolerance, vertex welding, inclusion of properties, and level of detail) are configurable per request.
-- Dockerfile and docker-compose configuration for containerised builds that compile IfcOpenShell and its dependencies from source.
+- Dockerfile and docker-compose configuration for containerised builds based on Ubuntu 24.04 that compile IfcOpenShell 0.8.0 and its dependencies from source.
 - Optional `GET /health` endpoint for service health checks.
 
 ## Project structure
@@ -56,7 +56,7 @@ Alternatively, install Gradle locally and run `gradle wrapper` inside the reposi
 docker-compose build
 ```
 
-The Docker build compiles OpenCascade, IfcOpenShell (with glTF support), the JNI library, and the Ktor service inside the builder stage image.
+The Docker build compiles OpenCascade, IfcOpenShell 0.8.0 (with glTF support), the JNI library, and the Ktor service inside the Ubuntu 24.04 builder stage image.
 
 ### 3. Start the service
 
@@ -90,6 +90,7 @@ The converted GLB artefact is written to `./data/out/<uuid>.glb` on the host.
 - The native converter now uses IfcOpenShell's glTF serializer to emit binary glTF (GLB) assets. The implementation is designed to work across multiple IfcOpenShell versions by probing available APIs at compile time.
 - `native/CMakeLists.txt` resolves IfcOpenShell and OpenCascade libraries automatically. Override `IFCOPENSHELL_ROOT` when building locally to point at a custom installation.
 - The Dockerfile demonstrates a complete toolchain build suitable for production containers. When iterating locally, ensure the same dependencies are available on the host before running `cmake`.
+- If cloning IfcOpenShell manually, include `--recurse-submodules` to fetch required modules such as `svgfill` that are needed for the build.
 
 ## Testing
 

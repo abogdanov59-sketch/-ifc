@@ -3,10 +3,10 @@
 ########################################
 # Builder image
 ########################################
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:24.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    IFCOPENSHELL_VERSION=0.7.0 \
+    IFCOPENSHELL_VERSION=0.8.0 \
     IFCOPENSHELL_ROOT=/opt/ifcopenshell
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -38,20 +38,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev \
     libhdf5-dev \
     nlohmann-json3-dev \
+    opencollada-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libocct-data-exchange-dev \
     libocct-foundation-dev \
-    libocct-modeling-dev \
+    libocct-modeling-algorithms-dev \
+    libocct-modeling-data-dev \
     libocct-ocaf-dev \
     libocct-visualization-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
-RUN git clone --depth 1 --branch v${IFCOPENSHELL_VERSION} https://github.com/IfcOpenShell/IfcOpenShell.git ifcopenshell
+RUN git clone --branch v${IFCOPENSHELL_VERSION} --recurse-submodules --depth 1 --shallow-submodules \
+    https://github.com/IfcOpenShell/IfcOpenShell.git ifcopenshell
 
-WORKDIR /tmp/ifcopenshell
+WORKDIR /tmp/ifcopenshell/cmake
 RUN cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${IFCOPENSHELL_ROOT} \
@@ -88,7 +91,7 @@ RUN ./scripts/download-gradle-wrapper.sh \
 ########################################
 # Runtime image
 ########################################
-FROM ubuntu:22.04 AS runtime
+FROM ubuntu:24.04 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive \
     IFCOPENSHELL_ROOT=/opt/ifcopenshell \
@@ -101,15 +104,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgmp10 \
     libmpfr6 \
     libeigen3-dev \
-    libboost-filesystem1.74.0 \
-    libboost-system1.74.0 \
-    libboost-program-options1.74.0 \
-    libboost-thread1.74.0 \
+    libboost-filesystem1.83.0 \
+    libboost-system1.83.0 \
+    libboost-program-options1.83.0 \
+    libboost-thread1.83.0 \
     libocct-data-exchange-dev \
     libocct-foundation-dev \
-    libocct-modeling-dev \
+    libocct-modeling-algorithms-dev \
+    libocct-modeling-data-dev \
     libocct-ocaf-dev \
     libocct-visualization-dev \
+    libopencollada0 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder ${IFCOPENSHELL_ROOT} ${IFCOPENSHELL_ROOT}
