@@ -90,7 +90,7 @@ The converted GLB artefact is written to `./data/out/<uuid>.glb` on the host.
 - The native converter now uses IfcOpenShell's glTF serializer to emit binary glTF (GLB) assets. The implementation is designed to work across multiple IfcOpenShell versions by probing available APIs at compile time.
 - `native/CMakeLists.txt` resolves IfcOpenShell and OpenCascade libraries automatically. Override `IFCOPENSHELL_ROOT` when building locally to point at a custom installation.
 - The Dockerfile demonstrates a complete toolchain build suitable for production containers. When iterating locally, ensure the same dependencies are available on the host before running `cmake`.
-- If cloning IfcOpenShell manually, include `--recurse-submodules` to fetch required modules such as `svgfill` that are needed for the build.
+- If cloning IfcOpenShell manually, include `--recurse-submodules` to fetch required modules such as `svgfill` that are needed for the build. The container build disables COLLADA support (and therefore the svgfill target) to avoid the additional dependency chain; re-enable it by passing `-DCOLLADA_SUPPORT=1` when configuring IfcOpenShell and ensuring OpenCOLLADA is available.
 
 ## Testing
 

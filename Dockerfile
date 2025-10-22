@@ -64,7 +64,7 @@ RUN cmake -S . -B build \
     -DBUILD_GEOMSERVER=0 \
     -DBUILD_EXAMPLES=0 \
     -DGLTF_SUPPORT=1 \
-    -DCOLLADA_SUPPORT=1 \
+    -DCOLLADA_SUPPORT=0 \
     -DIFCXML_SUPPORT=1 \
     -DUSE_OCCT_STATIC=0 \
     -GNinja
